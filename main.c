@@ -42,11 +42,13 @@ int main(void) {
   sid = setsid();
   if (sid < 0){
     fprintf(pLog, "Can't set session ID\n");
+    fflush(pLog);
     exit(EXIT_FAILURE);
   }
 
   if ((chdir("/")) < 0) {
-    [>fprintf(pLog, "Can't set working directory to /root \n");<]
+    fprintf(pLog, "Can't set working directory to /root \n");
+    fflush(pLog);
     exit(EXIT_FAILURE);
   }
 
@@ -58,6 +60,7 @@ int main(void) {
     timestamp = time(0);
     /*printf("Heartbeat: %ld\n", timestamp);*/
     fprintf(pLog, "Heartbeat: %ld\n", timestamp);
+    fflush(pLog);
 
     sleep(30);
   }
