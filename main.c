@@ -4,7 +4,7 @@
  * @date    April, 2018
  * @brief   Simple example of Linux daemon
  *
- * Description
+ * Daemon checks periodically if there are any new saved changes in projects (list_of_projects.cfg file) and backup these changes in configured path.
  */
 
 #include <sys/types.h>
@@ -18,10 +18,13 @@
 #include <string.h>
 #include <time.h>
 
+#define LOG_ERROR 1
+#define CFG_ERROR 2
+
 int main(void) {
 
   pid_t pid, sid;
-  FILE *pLog;
+  FILE *pLog, *pConf;
   time_t timestamp;
 
   pid = fork();
@@ -34,9 +37,16 @@ int main(void) {
 
   umask(0);
 
-  pLog = fopen("simple_daemon.log", "a");
+  pLog = fopen("simple_daemon.log", "w");
   if (pLog == NULL){
     exit(EXIT_FAILURE);
+    return LOG_ERROR;
+  }
+
+  pConf = fopen("list_of_projects.cfg", "r");
+  if (pConf == NULL){
+    exit(EXIT_FAILURE);
+    return CFG_ERROR;
   }
 
   sid = setsid();
@@ -64,7 +74,10 @@ int main(void) {
 
     sleep(30);
   }
+  fclose(pConf);
   fclose(pLog);
   exit(EXIT_SUCCESS);
+
+  return 0;
 }
 
