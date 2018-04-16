@@ -45,6 +45,7 @@ int main(void) {
 
   pConf = fopen("list_of_projects.cfg", "r");
   if (pConf == NULL){
+    fprintf(pLog, "Can't find list_of_projects.cfg file\n");
     exit(EXIT_FAILURE);
     return CFG_ERROR;
   }
@@ -68,7 +69,7 @@ int main(void) {
 
   while (1){
     timestamp = time(0);
-    /*printf("Heartbeat: %ld\n", timestamp);*/
+    //diff -qNr dir1/ dir2/ > project_name_diff.log
     fprintf(pLog, "Heartbeat: %ld\n", timestamp);
     fflush(pLog);
 
