@@ -18,14 +18,25 @@
 #include <string.h>
 #include <time.h>
 
-#define LOG_ERROR 1
+#define MAIN_LOG_FILE "simple_daemon.log"
 #define CFG_ERROR 2
 
-int main(void) {
+void write_log(char *file_name, char *message){
+  FILE *pLog = fopen(file_name, "a");
+  time_t timestamp = time(0);
 
+  if (pLog == NULL){
+    exit(EXIT_FAILURE);
+    return;
+  }
+  fprintf(pLog, "TIME: %ld: %s\n", timestamp, message);
+  /*fflush(pLog);*/
+  fclose(pLog);
+}
+
+int main(void) {
   pid_t pid, sid;
-  FILE *pLog, *pConf;
-  time_t timestamp;
+  FILE *pConf;
 
   pid = fork();
   if (pid < 0){
@@ -37,46 +48,35 @@ int main(void) {
 
   umask(0);
 
-  pLog = fopen("simple_daemon.log", "w");
-  if (pLog == NULL){
-    exit(EXIT_FAILURE);
-    return LOG_ERROR;
-  }
-
   pConf = fopen("list_of_projects.cfg", "r");
   if (pConf == NULL){
-    fprintf(pLog, "Can't find list_of_projects.cfg file\n");
+    write_log(MAIN_LOG_FILE, "Can't find list_of_projects.cfg file");
     exit(EXIT_FAILURE);
     return CFG_ERROR;
   }
 
   sid = setsid();
   if (sid < 0){
-    fprintf(pLog, "Can't set session ID\n");
-    fflush(pLog);
+    write_log(MAIN_LOG_FILE, "Can't set session ID");
     exit(EXIT_FAILURE);
   }
 
-  if ((chdir("/")) < 0) {
-    fprintf(pLog, "Can't set working directory to /root \n");
-    fflush(pLog);
-    exit(EXIT_FAILURE);
-  }
+  /*if ((chdir("/")) < 0){*/
+    /*write_log(MAIN_LOG_FILE, "Can't set working directory to /root");*/
+    /*exit(EXIT_FAILURE);*/
+  /*}*/
 
   close(STDIN_FILENO);
   close(STDOUT_FILENO);
   close(STDERR_FILENO);
 
   while (1){
-    timestamp = time(0);
     //diff -qNr dir1/ dir2/ > project_name_diff.log
-    fprintf(pLog, "Heartbeat: %ld\n", timestamp);
-    fflush(pLog);
+    write_log(MAIN_LOG_FILE, "HEARTBEAT");
 
     sleep(30);
   }
   fclose(pConf);
-  fclose(pLog);
   exit(EXIT_SUCCESS);
 
   return 0;
